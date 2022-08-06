@@ -10,26 +10,29 @@ source:
   sha256: c9ed54321fa8c4ca0132ffd3369582759eda7252fb4b3bee480e690d1ba41f46
 
 build:
-  noarch: python
   script: {{ PYTHON }} -m pip install . -vv
   number: 0
+  skip: True  # [py<37]
 
 requirements:
   host:
-    - python >=3.7
+    - python
     - pip
+    - setuptools
+    - wheel
+
   run:
-    - python >=3.7
+    - python
     - cachelib
     - flask >=0.8
 
 test:
+  requires:
+    - pip
   imports:
     - flask_session
   commands:
     - pip check
-  requires:
-    - pip
 
 about:
   home: https://github.com/fengsp/flask-session
