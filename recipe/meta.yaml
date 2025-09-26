@@ -56,9 +56,9 @@ test:
   requires:
     - pip
     - pytest
-    - pymongo
-    - redis
-    - flask-sqlalchemy
+    - pymongo >=4.6.2
+    - redis-py >=5.0.3
+    - flask-sqlalchemy >=3.0.5
     - pytest-cov
   commands:
     - pip check
