@@ -56,7 +56,7 @@ test:
   requires:
     - pip
     - pytest
-    - boto
+    - boto3
     - pymongo
     - redis
     - flask-sqlalchemy
