@@ -1,44 +1,77 @@
-{% set name = "flask-session" %}
-{% set version = "0.4.0" %}
+{% set name = "Flask-Session" %}
+{% set version = "0.8.0" %}
 
 package:
   name: {{ name|lower }}
   version: {{ version }}
 
 source:
-  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/Flask-Session-{{ version }}.tar.gz
-  sha256: c9ed54321fa8c4ca0132ffd3369582759eda7252fb4b3bee480e690d1ba41f46
+  url: https://github.com/pallets-eco/{{ name|lower }}/archive/refs/tags/{{ version }}.tar.gz
+  sha256: 017c852d3df6b8492666b5e3544bb4f283a49ca357fac28af465b8cb8017f1e4
 
 build:
-  script: {{ PYTHON }} -m pip install . -vv
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
   number: 0
-  skip: True  # [py<37]
+  skip: true  # [py<38]
 
 requirements:
   host:
     - python
     - pip
-    - setuptools
-    - wheel
-
+    - flit-core <4
   run:
     - python
     - cachelib
-    - flask >=0.8
+    - flask >=2.2
+    - msgspec >=0.18.6
+  run_constrained:
+    - pymongo >=4.6.2
+    - redis-py >=5.0.3
+    - flask-sqlalchemy >=3.0.5
+    - cachelib >=0.10.2
+
+# E   ModuleNotFoundError: No module named 'mypy_boto3_dynamodb'
+{% set ignore_tests = " --ignore=tests/test_dynamodb.py" %}
+# E   ModuleNotFoundError: No module named 'pymemcache'
+{% set ignore_tests = ignore_tests + " --ignore=tests/test_memcached.py" %}
+# redis.exceptions.ConnectionError: Error 61 connecting to localhost:6379. Connection refused.
+{% set tests_to_skip = "test_redis_default" %}
+# pymongo.errors.ServerSelectionTimeoutError: localhost:27017: [Errno 61] Connection refused
+{% set tests_to_skip = tests_to_skip + " or test_mongo_default" %}
 
 test:
-  requires:
-    - pip
+  source_files:
+    - tests
   imports:
     - flask_session
+    - flask_session.cachelib
+    - flask_session.defaults
+    - flask_session.filesystem
+    - flask_session.memcached
+    - flask_session.mongodb
+    - flask_session.redis
+    - flask_session.sqlalchemy
+  requires:
+    - pip
+    - pytest
+    - pymongo >=4.6.2
+    - redis-py >=5.0.3
+    - flask-sqlalchemy >=3.0.5
+    - pytest-cov
   commands:
     - pip check
+    - python -c "from importlib.metadata import version; assert(version('{{ name }}')=='{{ version }}')"
+    - pytest -v tests --cov=. --cov-config=.coveragerc {{ ignore_tests }} -k "not({{ tests_to_skip }})"
 
 about:
-  home: https://github.com/fengsp/flask-session
-  summary: Adds server-side session support to your Flask application
+  home: https://github.com/pallets-eco/flask-session
+  summary: Flask-Session is an extension for Flask that adds support for server-side sessions to your application.
+  description: Flask-Session is an extension for Flask that adds support for server-side sessions to your application.
   license: BSD-3-Clause
-  license_file: LICENSE
+  license_family: BSD
+  license_file: LICENSE.rst
+  doc_url: https://flask-session.readthedocs.io
+  dev_url: https://github.com/pallets-eco/flask-session
 
 extra:
   recipe-maintainers:
